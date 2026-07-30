@@ -1,6 +1,6 @@
 # Gimmie Right — Static Landing Page
 
-This repository contains a single-file static landing page `indexGimmieRight.html` and an `assets/` folder with images used by the page.
+This repository contains a single-file static landing page `index.html` and an `assets/` folder with images used by the page.
 
 Goal: publish this site publicly (GitHub Pages, Netlify, Vercel, etc.) so social shares show the correct thumbnail.
 
@@ -24,7 +24,7 @@ git push -u origin main
 
 3. In the GitHub repository, go to Settings → Pages and enable Pages from the `main` branch (root). GitHub will publish to a URL like `https://YOUR_USERNAME.github.io/YOUR_REPO/` within a minute or two.
 
-4. Once you have the public site URL, update the open-graph metadata in `indexGimmieRight.html` to use the full public URL for `og:image` and `twitter:image` (example below):
+4. Once you have the public site URL, update the open-graph metadata in `index.html` to use the full public URL for `og:image` and `twitter:image` (example below):
 
 ```html
 <meta property="og:image" content="https://YOUR_USERNAME.github.io/YOUR_REPO/assets/craft-shoe.png">
@@ -39,7 +39,7 @@ If you want, paste the GitHub repository URL here and I will add the remote and 
 
 Files of interest:
 
-- `indexGimmieRight.html` — main page
+- `index.html` — main page
 - `assets/` — images (thumbnail is `assets/craft-shoe.png`)
 
 Questions? I can push to a repo for you if you provide the target repo URL, or I can walk you through the steps.
