@@ -312,11 +312,18 @@
   [data-reveal].is-visible{ opacity: 1; transform: translateY(0); }
 
   @media (max-width: 860px){
-    .card-grid, .card-grid.two-up{ grid-template-columns: 1fr; }
+    .stats-grid, .service-grid{ grid-template-columns: 1fr; }
     .steps{ grid-template-columns: 1fr 1fr; }
     .craft-grid, .visit-grid{ grid-template-columns: 1fr; }
     nav.links{ display:none; }
     .stitch-spine{ display: none; }
+    .craft-visual img{ max-width: 100%; transform: none; }
+  }
+
+  @media (max-width: 480px){
+    .steps{ grid-template-columns: 1fr; }
+    .hero{ padding: 4.5rem 0 5rem; }
+    .service-card.highlight{ transform: none; }
   }
 
   @media (prefers-reduced-motion: reduce){
