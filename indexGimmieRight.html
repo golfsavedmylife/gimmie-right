@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gimmie Right Shoe Care, Galloway Golf Course</title>
+<meta name="description" content="On-course golf shoe cleaning and spike replacement with expert care at Galloway Golf Course.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gimmie Right Shoe Care, Galloway Golf Course">
+<meta property="og:description" content="On-course golf shoe cleaning and spike replacement with expert care at Galloway Golf Course.">
+<meta property="og:image" content="assets/craft-shoe.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1300">
+<meta property="og:image:height" content="854">
+<meta property="og:image:alt" content="Golf shoe service visual highlighting clean shoes and spike care">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gimmie Right Shoe Care, Galloway Golf Course">
+<meta name="twitter:description" content="On-course golf shoe cleaning and spike replacement with expert care at Galloway Golf Course.">
+<meta name="twitter:image" content="assets/craft-shoe.png">
+<link rel="image_src" href="assets/craft-shoe.png">
+
+<!--
+  EDITING NOTES FOR VS CODE:
+  - Replace all [BRACKETED] placeholders: address, hours, email, phone.
+  - Colors & type live in :root at the top of the <style> block.
+  - This is intentionally a single self-contained file for easy previewing;
+    split into index.html / styles.css / script.js later if you want a
+    multi-file project — everything is already organized in that order below.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --green-950: #101C14;
+    --green-800: #24392A;
+    --chalk-100: #F3EFE4;
+    --brass-500: #C7A24E;
+    --leather-700: #6E4326;
+    --ink-900: #16160F;
+
+    --display: 'Fraunces', serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+
+    --max-w: 1120px;
+    --edge: clamp(1.5rem, 5vw, 4rem);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin: 0;
+    background: var(--chalk-100);
+    color: var(--ink-900);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, svg{ display:block; max-width:100%; }
+  a{ color: inherit; }
+  h1,h2,h3{ font-family: var(--display); margin: 0; }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass-500);
+  }
+  section{ position: relative; }
+  .wrap{
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+  }
+
+  /* ---------- nav ---------- */
+  header.nav{
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(16,28,20,0.94);
+    backdrop-filter: blur(6px);
+  }
+  .nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-top: 1.1rem; padding-bottom: 1.1rem;
+  }
+  .wordmark{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    color: var(--chalk-100);
+  }
+  .wordmark span{ color: var(--brass-500); }
+  nav.links{ display:flex; gap: 1.75rem; }
+  nav.links a{
+    color: var(--chalk-100);
+    text-decoration: none;
+    font-size: 0.92rem;
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+  }
+  nav.links a:hover{ opacity: 1; }
+  .btn{
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.7rem 1.3rem;
+    border-radius: 2px;
+    border: 1px solid var(--brass-500);
+    color: var(--chalk-100);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .btn:hover{ background: var(--brass-500); color: var(--green-950); }
+  .btn.solid{ background: var(--brass-500); color: var(--green-950); }
+  .btn.solid:hover{ background: var(--chalk-100); border-color: var(--chalk-100); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    background:
+      linear-gradient(135deg, rgba(16,28,20,0.96) 0%, rgba(36,57,42,0.92) 45%, rgba(199,162,78,0.28) 100%),
+      url('assets/hero-golf.avif') center/cover;
+    color: var(--chalk-100);
+    padding: 6rem 0 7rem;
+    overflow: hidden;
+  }
+  .hero .wrap{ text-align:center; position:relative; z-index:2; }
+  .hero .eyebrow{ display:block; margin-bottom: 1.1rem; }
+  .hero h1{
+    font-size: clamp(3rem, 9vw, 6.2rem);
+    line-height: 0.96;
+    letter-spacing: -0.01em;
+  }
+  .hero p.sub{
+    max-width: 34ch;
+    margin: 1.6rem auto 2.4rem;
+    font-size: 1.08rem;
+    color: rgba(243,239,228,0.82);
+  }
+  .hero .cta-row{ display:flex; gap: 1rem; justify-content:center; flex-wrap: wrap; }
+  .hero::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% 35%, rgba(243,239,228,0.18), transparent 34%);
+    pointer-events: none;
+  }
+
+  /* ---------- foundation ---------- */
+  .foundation{ background: #f7f2e7; padding: 6rem 0; }
+  .stats-grid{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .stat-card{
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 22px 56px rgba(16, 28, 20, 0.09);
+  }
+  .stat-num{
+    font-family: var(--display);
+    font-size: 3rem;
+    color: var(--green-950);
+    margin: 0 0 0.8rem;
+  }
+  .stat-copy{
+    margin: 0;
+    color: #3a3a30;
+    line-height: 1.7;
+    font-size: 0.98rem;
+  }
+
+  /* ---------- services ---------- */
+  .services{ background: var(--chalk-100); padding: 6rem 0; }
+  .section-head{ max-width: 46ch; margin-bottom: 3rem; }
+  .section-head h2{ font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin-top: 0.5rem; }
+  .service-grid{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    gap: 1.75rem;
+  }
+  .service-card{
+    background: #fff;
+    border-radius: 26px;
+    padding: 2rem;
+    box-shadow: 0 24px 60px rgba(16, 28, 20, 0.08);
+    display:flex;
+    flex-direction:column;
+    gap: 1rem;
+    border: 1px solid rgba(16, 28, 20, 0.08);
+  }
+  .service-card.highlight{
+    border-color: var(--brass-500);
+    box-shadow: 0 30px 80px rgba(199, 162, 78, 0.22);
+    background: rgba(199, 162, 78, 0.08);
+    transform: translateY(-6px);
+  }
+  .service-card.highlight .price{
+    color: var(--brass-500);
+  }
+  .service-card.highlight .tag{
+    background: var(--brass-500);
+    color: var(--green-950);
+  }
+  .service-card .price{
+    font-family: var(--display);
+    font-size: 2.4rem;
+    color: var(--green-950);
+    margin: 0;
+  }
+  .service-card h3{ font-size: 1.2rem; margin: 0; }
+  .service-card p{ font-size: 0.95rem; color: #3a3a30; margin: 0; line-height: 1.7; }
+  .service-card .tag{
+    display:inline-block;
+    padding: 0.3rem 0.75rem;
+    background: rgba(199,162,78,0.12);
+    color: var(--green-950);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .callout{
+    margin-top: 1.5rem;
+    border: 1px dashed var(--brass-500);
+    background: rgba(199,162,78,0.08);
+    padding: 1.1rem 1.4rem;
+    display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+  }
+  .callout-tag{
+    font-family: var(--mono);
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--green-950); background: var(--brass-500);
+    padding: 0.25rem 0.6rem; border-radius: 2px; flex-shrink: 0;
+  }
+  .callout p{ margin: 0; font-size: 0.95rem; color: #3a3a30; }
+
+  /* ---------- process ---------- */
+  .process{ background: var(--green-800); color: var(--chalk-100); padding: 6rem 0; }
+  .process .section-head .eyebrow{ color: var(--chalk-100); opacity: 0.6; }
+  .steps{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .step{ padding-top: 0.5rem; }
+  .step .num{ font-family: var(--mono); color: var(--brass-500); font-size: 0.85rem; }
+  .step h3{ font-size: 1.05rem; margin: 0.5rem 0 0.5rem; }
+  .step p{ font-size: 0.9rem; color: rgba(243,239,228,0.75); margin:0; }
+
+  /* ---------- craft ---------- */
+  .craft{ background: var(--chalk-100); padding: 6rem 0; }
+  .craft-grid{
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items:center;
+  }
+  .craft h2{ font-size: clamp(1.8rem, 3.4vw, 2.4rem); margin: 0.5rem 0 1.1rem; }
+  .craft p{ font-size: 1rem; color: #3a3a30; max-width: 46ch; }
+  .boot-illustration{ justify-self:center; }
+  .craft-visual{
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+    min-height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .craft-visual img{
+    width: auto;
+    max-width: 120%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+    transform: scale(1.25);
+    transform-origin: center;
+  }
+
+  /* ---------- visit ---------- */
+  .visit{ background: var(--green-950); color: var(--chalk-100); padding: 6rem 0 5rem; }
+  .visit-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+  .visit h2{ font-size: clamp(1.8rem, 3.4vw, 2.4rem); margin: 0.5rem 0 1.2rem; }
+  .visit dl{ margin: 0 0 2rem; }
+  .visit dt{ font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass-500); margin-top: 1.1rem; }
+  .visit dd{ margin: 0.3rem 0 0; font-size: 1rem; color: rgba(243,239,228,0.88); }
+  .note{ font-size: 0.88rem; color: rgba(243,239,228,0.55); margin-top: 1.5rem; }
+
+  footer{
+    background: var(--green-950);
+    border-top: 1px solid rgba(199,162,78,0.25);
+    color: rgba(243,239,228,0.55);
+    font-size: 0.85rem;
+    padding: 1.6rem 0;
+    text-align:center;
+  }
+
+  [data-reveal]{ opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  [data-reveal].is-visible{ opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 860px){
+    .card-grid, .card-grid.two-up{ grid-template-columns: 1fr; }
+    .steps{ grid-template-columns: 1fr 1fr; }
+    .craft-grid, .visit-grid{ grid-template-columns: 1fr; }
+    nav.links{ display:none; }
+    .stitch-spine{ display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    .stitch-path{ animation: none; stroke-dashoffset: 0; }
+    [data-reveal]{ opacity:1; transform:none; transition:none; }
+  }
+
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--brass-500);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <div class="wordmark">GIMMIE <span>RIGHT</span></div>
+    <nav class="links">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#craft">Craft</a>
+      <a href="#visit">Visit</a>
+    </nav>
+    <a class="btn solid" href="mailto:info@snkrrbar.com?subject=Tune-Up%20Request">Book us now</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Shoe Care at The Links of Galloway</span>
+    <h1>Great golf starts with a solid foundation.</h1>
+    <p class="sub">Your shoes are the only part of your body that touches the ground. When your foundation is secure, every swing is more stable, more powerful, and more consistent.</p>
+    <div class="cta-row">
+      <a class="btn solid" href="#services">See Services</a>
+      <a class="btn" href="mailto:info@snkrrbar.com?subject=Tune-Up%20Request">Book us now</a>
+    </div>
+  </div>
+</section>
+
+<section class="foundation" id="foundation">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Foundation matters</span>
+      <h2>Grip the ground and own the swing.</h2>
+      <p>Success in golf is built from the bottom up. If your shoes slip or look tired, your alignment shifts, your stance breaks, and your swing loses consistency. Clean, polished footwear is part of the foundation — it helps you feel ready, look sharp, and perform with confidence.</p>
+    </div>
+    <div class="stats-grid" data-reveal>
+      <div class="stat-card">
+        <p class="stat-num">85%</p>
+        <p class="stat-copy">Most instructors say the lower body drives the majority of swing power. Without secure shoe traction, that power is wasted before it reaches the ball.</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num">70%</p>
+        <p class="stat-copy">A solid grip on the ground prevents slide and keeps your weight shift predictable. Clean, well-maintained shoes also keep your stance looking sharp and your confidence high.</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num">1</p>
+        <p class="stat-copy">One strong foundation is the first step in every great round. Fresh spikes and reliable shoe care are the foundation your swing needs to feel right.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">How it works</span>
+      <h2>Drop-off before you tee off</h2>
+    </div>
+    <div class="steps">
+      <div class="step" data-reveal>
+        <span class="num">01</span>
+        <h3>Drop off</h3>
+        <p>Shoes for a clean and spike swap any day of the week.</p>
+      </div>
+      <div class="step" data-reveal>
+        <span class="num">02</span>
+        <h3>We take a look</h3>
+        <p>Every pair or set gets a real once-over before we touch a thing.</p>
+      </div>
+      <div class="step" data-reveal>
+        <span class="num">03</span>
+        <h3>We get to work</h3>
+        <p>Spikes swapped, leather cleaned, soles refreshed, done by hand, same day when we can.</p>
+      </div>
+      <div class="step" data-reveal>
+        <span class="num">04</span>
+        <h3>Ready for the tee</h3>
+        <p>Pick them up looking and feeling right.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="craft" id="craft">
+  <div class="wrap craft-grid">
+    <div data-reveal>
+      <span class="eyebrow">The craft</span>
+      <h2>Built on a foundation of traction and precision.</h2>
+      <p>Whether it is the first drive or the final putt, your swing begins with the ground beneath your feet. Gimmie Right restores that foundation: clean, polished shoes and firm spikes that let your body move with confidence, control, and a sharp on-course presence.</p>
+    </div>
+    <div class="craft-visual" data-reveal>
+      <img src="assets/craft-shoe.png" alt="Golf shoes showing before and after cleaning with a polished finish">
+    </div>
+  </div>
+</section>
+
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">What we do</span>
+      <h2>Choose your tier of care</h2>
+    </div>
+    <div class="service-grid">
+      <div class="service-card" data-reveal>
+        <span class="tag">Starter</span>
+        <p class="price">$40</p>
+        <h3>Deep Clean</h3>
+        <p>Basic shoe cleaning, spike polish, and mud removal to keep your foundation steady on the course.</p>
+      </div>
+      <div class="service-card" data-reveal>
+        <span class="tag">Best Value</span>
+        <p class="price">$60</p>
+        <h3>Luxury Clean</h3>
+        <p>More detailed conditioning, premium spike care, and a polished finish that keeps your shoes looking as good as they feel.</p>
+      </div>
+      <div class="service-card highlight" data-reveal>
+        <span class="tag">Premium</span>
+        <p class="price">$80</p>
+        <h3>Signature Clean</h3>
+        <p>Top-to-bottom restoration, polish and shine, spike detail, minor paint touch-ups, and priority handling for the cleanest, most dependable footing.</p>
+      </div>
+    </div>
+    <div class="callout" data-reveal>
+      <span class="callout-tag">On the house</span>
+      <p>Every service comes with complimentary golf tees and a swag bag, plus a same-day readiness check so your shoes leave looking sharp and ready for the round.</p>
+    </div>
+  </div>
+</section>
+
+<section class="visit" id="visit">
+  <div class="wrap visit-grid">
+    <div data-reveal>
+      <span class="eyebrow">Visit</span>
+      <h2>Find us at Galloway</h2>
+      <a class="btn solid" href="mailto:info@snkrrbar.com?subject=Question%20for%20Gimmie%20Right">Get in Touch</a>
+    </div>
+    <div data-reveal>
+      <dl>
+        <dt>Address</dt>
+        <dd>Links at Galloway, 3815 Walnut Grove Rd, Memphis, TN 38111</dd>
+        <dt>Hours</dt>
+        <dd>Open Tue to Sun, 8am to 4pm</dd>
+        <dt>Phone</dt>
+        <dd><a href="tel:+19016367805">(901) 636-7805</a></dd>
+      </dl>
+      <p class="note">Located inside the clubhouse building.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">© 2026 Gimmie Right. Independently owned and operated.</div>
+</footer>
+
+<script>
+  // Restrained scroll-reveal for section content — respects reduced motion via CSS above.
+  const revealEls = document.querySelectorAll('[data-reveal]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  }
+</script>
+
+</body>
+</html>
