@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Round Tracker — Gimmie Right</title>
+<meta name="description" content="Track your golf rounds: score, putts, fairways, and greens in regulation, with stats over time.">
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --green-950: #101C14;
+    --green-800: #24392A;
+    --chalk-100: #F3EFE4;
+    --brass-500: #C7A24E;
+    --leather-700: #6E4326;
+    --ink-900: #16160F;
+    --bad-600: #A4453A;
+
+    --display: 'Fraunces', serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+
+    --max-w: 860px;
+    --edge: clamp(1.25rem, 5vw, 2.5rem);
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin: 0;
+    background: var(--chalk-100);
+    color: var(--ink-900);
+    font-family: var(--body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3{ font-family: var(--display); margin: 0; }
+  a{ color: inherit; }
+  .wrap{ max-width: var(--max-w); margin: 0 auto; padding-left: var(--edge); padding-right: var(--edge); }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brass-500);
+  }
+
+  header.nav{
+    background: var(--green-950);
+    color: var(--chalk-100);
+    padding: 1.1rem 0;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header.nav .wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .wordmark{ font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+  .wordmark span{ color: var(--brass-500); }
+  .wordmark small{ display:block; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; opacity: 0.6; text-transform: uppercase; font-weight: 400; margin-top: 0.15rem; }
+  header.nav a.back{ font-size: 0.85rem; color: var(--chalk-100); opacity: 0.75; text-decoration:none; font-family: var(--mono); }
+  header.nav a.back:hover{ opacity: 1; }
+
+  main{ padding: 2.5rem 0 5rem; }
+
+  .btn{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0.75rem 1.4rem;
+    border-radius: 2px;
+    border: 1px solid var(--brass-500);
+    background: transparent;
+    color: var(--ink-900);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .btn:hover{ background: var(--brass-500); color: var(--green-950); }
+  .btn.solid{ background: var(--brass-500); color: var(--green-950); border-color: var(--brass-500); }
+  .btn.solid:hover{ background: var(--green-950); color: var(--chalk-100); border-color: var(--green-950); }
+  .btn.ghost{ border-color: rgba(16,28,20,0.2); color: var(--ink-900); }
+  .btn.danger{ border-color: var(--bad-600); color: var(--bad-600); }
+  .btn.danger:hover{ background: var(--bad-600); color: var(--chalk-100); }
+  .btn.small{ padding: 0.45rem 0.9rem; font-size: 0.7rem; }
+  .btn[disabled]{ opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+  .row{ display:flex; align-items:center; gap: 0.75rem; flex-wrap: wrap; }
+  .row.between{ justify-content: space-between; }
+
+  section.view{ display:none; }
+  section.view.active{ display:block; }
+
+  /* dashboard */
+  .stat-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 1.75rem 0 2.5rem;
+  }
+  .stat-card{
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.25rem 1rem;
+    box-shadow: 0 14px 34px rgba(16,28,20,0.08);
+    text-align: center;
+  }
+  .stat-card .num{ font-family: var(--display); font-size: 1.9rem; color: var(--green-950); }
+  .stat-card .lbl{ font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6b5f; margin-top: 0.35rem; }
+
+  .empty{
+    background: #fff;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 14px 34px rgba(16,28,20,0.06);
+    color: #55554a;
+  }
+
+  .round-list{ display:flex; flex-direction:column; gap: 0.75rem; }
+  .round-item{
+    background:#fff;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 10px 26px rgba(16,28,20,0.06);
+    display:flex; align-items:center; justify-content:space-between;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease;
+  }
+  .round-item:hover{ border-color: var(--brass-500); }
+  .round-item .course{ font-weight: 600; }
+  .round-item .date{ font-family: var(--mono); font-size: 0.72rem; color: #7a7a6d; margin-top: 0.2rem; }
+  .round-item .score{ text-align:right; }
+  .round-item .score .total{ font-family: var(--display); font-size: 1.5rem; }
+  .round-item .score .topar{ font-family: var(--mono); font-size: 0.72rem; }
+  .topar.under{ color: #2e6b3e; }
+  .topar.over{ color: var(--bad-600); }
+  .topar.even{ color: #6b6b5f; }
+
+  /* setup */
+  .field{ margin-bottom: 1.25rem; }
+  .field label{ display:block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6b5f; margin-bottom: 0.4rem; }
+  .field input[type=text], .field select{
+    width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px;
+    border: 1px solid rgba(16,28,20,0.18); font-family: var(--body); font-size: 0.95rem;
+    background: #fff;
+  }
+  .seg{ display:flex; gap: 0.5rem; }
+  .seg button{
+    flex:1; padding: 0.7rem; border-radius: 8px; border: 1px solid rgba(16,28,20,0.18);
+    background: #fff; font-family: var(--mono); font-size: 0.85rem; cursor:pointer;
+  }
+  .seg button.active{ background: var(--green-950); color: var(--chalk-100); border-color: var(--green-950); }
+
+  .par-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(64px,1fr)); gap: 0.6rem; margin-top: 0.5rem; }
+  .par-cell{ text-align:center; background:#fff; border-radius:10px; padding: 0.5rem 0.3rem; border: 1px solid rgba(16,28,20,0.1); }
+  .par-cell .h{ font-family: var(--mono); font-size: 0.62rem; color:#7a7a6d; }
+  .par-cell select{ width:100%; margin-top:0.3rem; border:none; background:transparent; font-family: var(--mono); font-size:0.85rem; text-align:center; }
+
+  /* scorecard entry */
+  table.card{ width:100%; border-collapse: collapse; background:#fff; border-radius: 14px; overflow:hidden; box-shadow: 0 14px 34px rgba(16,28,20,0.06); }
+  table.card th, table.card td{ padding: 0.6rem 0.5rem; text-align:center; border-bottom: 1px solid rgba(16,28,20,0.06); }
+  table.card th{ font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform:uppercase; color:#6b6b5f; background:#f7f2e7; }
+  table.card td input[type=number]{ width: 3rem; text-align:center; padding:0.35rem; border-radius:6px; border:1px solid rgba(16,28,20,0.15); font-family: var(--body); }
+  table.card td.hole{ font-family: var(--mono); font-weight:600; }
+  table.card td.gir-yes{ color:#2e6b3e; font-weight:600; }
+  table.card td.gir-no{ color:#b7b0a0; }
+  table.card input[type=checkbox]{ width: 1.1rem; height:1.1rem; }
+  table.card td.na{ color:#cfc9ba; font-family: var(--mono); font-size:0.75rem; }
+  tfoot td{ font-family: var(--mono); font-weight:600; background:#f7f2e7; }
+
+  .scroll-x{ overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.25rem; }
+
+  /* detail */
+  .detail-summary{ display:grid; grid-template-columns: repeat(4,1fr); gap:0.75rem; margin: 1.5rem 0; }
+
+  /* tabs */
+  .tabs{ display:flex; margin: 1.5rem 0 0; border-bottom: 1px solid rgba(16,28,20,0.12); }
+  .tabs button{
+    background:none; border:none; cursor:pointer;
+    padding: 0.7rem 0.1rem; margin-right: 1.5rem;
+    font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #8a8a7a; border-bottom: 2px solid transparent;
+  }
+  .tabs button.active{ color: var(--green-950); border-bottom-color: var(--brass-500); }
+  main > .wrap-inner, #view-dashboard, #view-clubs, #view-planner{ padding-top: 2rem; }
+
+  /* clubs */
+  .shot-item{
+    background:#fff; border-radius: 12px; padding: 0.75rem 1rem;
+    box-shadow: 0 8px 20px rgba(16,28,20,0.05);
+    display:flex; align-items:center; justify-content:space-between; margin-bottom: 0.6rem; gap: 1rem;
+  }
+  .shot-item .btn{ flex-shrink: 0; }
+  .chart-wrap{ background:#fff; border-radius:16px; padding: 1rem; box-shadow: 0 14px 34px rgba(16,28,20,0.06); margin-top: 1rem; }
+  .chart-wrap svg{ width:100%; height:auto; display:block; }
+
+  /* planner */
+  .planner-grid{ display:grid; grid-template-columns: 320px 1fr; gap: 2rem; margin-top: 1.5rem; align-items:start; }
+  .planner-controls .field input, .planner-controls select{
+    width:100%; padding: 0.6rem 0.7rem; border-radius: 8px; border: 1px solid rgba(16,28,20,0.18);
+    font-family: var(--body); font-size: 0.9rem; background: #fff;
+  }
+  .hazard-form input{ padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid rgba(16,28,20,0.15); font-size: 0.82rem; width:100%; margin-bottom: 0.4rem; }
+  .hazard-form-row{ display:grid; grid-template-columns: repeat(2,1fr); gap: 0.4rem; }
+  .hint{ font-size: 0.7rem; color: #8a8a7a; margin: 0.35rem 0 0; line-height: 1.5; }
+  .hazard-chip{
+    display:flex; align-items:center; justify-content:space-between; gap: 0.5rem;
+    background:#fff; border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 0.4rem;
+    font-size: 0.78rem; box-shadow: 0 6px 16px rgba(16,28,20,0.05);
+  }
+  .hazard-chip button{ background:none; border:none; color: var(--bad-600); cursor:pointer; font-family: var(--mono); font-size: 0.68rem; flex-shrink:0; }
+  .planner-visual .chart-wrap{ margin-top:0; }
+  .planner-stats{ display:grid; grid-template-columns: repeat(4,1fr); gap: 0.6rem; margin-top: 1rem; }
+
+  @media (max-width: 640px){
+    .stat-grid{ grid-template-columns: repeat(2,1fr); }
+    .detail-summary{ grid-template-columns: repeat(2,1fr); }
+    .planner-grid{ grid-template-columns: 1fr; }
+    .planner-stats{ grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <div class="wordmark">GIMMIE <span>RIGHT</span><small>Round Tracker</small></div>
+    <a class="back" href="../index.html">&larr; Main site</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <nav class="tabs">
+    <button type="button" class="tab-btn active" data-tab="view-dashboard">Rounds</button>
+    <button type="button" class="tab-btn" data-tab="view-clubs">Clubs</button>
+    <button type="button" class="tab-btn" data-tab="view-planner">Tee Planner</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="row between">
+      <div>
+        <span class="eyebrow">Your game</span>
+        <h1 style="font-size:2rem;">Rounds &amp; stats</h1>
+      </div>
+      <button class="btn solid" id="btn-new-round">+ New round</button>
+    </div>
+
+    <div class="stat-grid" id="stat-grid"></div>
+
+    <h2 style="font-size:1.1rem; margin-bottom:1rem;">Round history</h2>
+    <div id="round-list-wrap"></div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="view" id="view-setup">
+    <span class="eyebrow">New round</span>
+    <h1 style="font-size:1.8rem; margin-bottom:1.5rem;">Set up your scorecard</h1>
+
+    <div class="field">
+      <label for="setup-course">Course (optional)</label>
+      <input type="text" id="setup-course" placeholder="e.g. Links at Galloway">
+    </div>
+
+    <div class="field">
+      <label>Holes</label>
+      <div class="seg">
+        <button type="button" data-holes="9">9 holes</button>
+        <button type="button" data-holes="18" class="active">18 holes</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Par per hole</label>
+      <div class="par-grid" id="par-grid"></div>
+    </div>
+
+    <div class="row" style="margin-top:2rem;">
+      <button class="btn solid" id="btn-start-round">Start round</button>
+      <button class="btn ghost" id="btn-cancel-setup">Cancel</button>
+    </div>
+  </section>
+
+  <!-- SCORECARD ENTRY -->
+  <section class="view" id="view-scorecard">
+    <span class="eyebrow" id="sc-course-label">New round</span>
+    <h1 style="font-size:1.8rem; margin-bottom:1.25rem;">Enter your scores</h1>
+
+    <div class="scroll-x">
+      <table class="card" id="scorecard-table">
+        <thead>
+          <tr>
+            <th>Hole</th>
+            <th>Par</th>
+            <th>Score</th>
+            <th>Putts</th>
+            <th>Fairway</th>
+            <th>GIR</th>
+          </tr>
+        </thead>
+        <tbody id="scorecard-body"></tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td id="sc-total-par">—</td>
+            <td id="sc-total-score">—</td>
+            <td id="sc-total-putts">—</td>
+            <td colspan="2" id="sc-total-topar">—</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p style="font-size:0.8rem; color:#7a7a6d; margin-top:0.75rem;">Fairway hit only applies to par 4s and 5s. GIR is calculated automatically from score and putts (on the green in par minus 2 strokes or better).</p>
+
+    <div class="row" style="margin-top:1.5rem;">
+      <button class="btn solid" id="btn-save-round">Save round</button>
+      <button class="btn ghost" id="btn-cancel-round">Discard</button>
+    </div>
+  </section>
+
+  <!-- ROUND DETAIL -->
+  <section class="view" id="view-detail">
+    <div class="row between">
+      <div>
+        <span class="eyebrow" id="detail-date">Round</span>
+        <h1 style="font-size:1.8rem;" id="detail-course">Round</h1>
+      </div>
+      <button class="btn danger small" id="btn-delete-round">Delete round</button>
+    </div>
+
+    <div class="detail-summary" id="detail-summary"></div>
+
+    <div class="scroll-x">
+      <table class="card" id="detail-table">
+        <thead>
+          <tr><th>Hole</th><th>Par</th><th>Score</th><th>Putts</th><th>Fairway</th><th>GIR</th></tr>
+        </thead>
+        <tbody id="detail-body"></tbody>
+      </table>
+    </div>
+
+    <div class="row" style="margin-top:1.5rem;">
+      <button class="btn ghost" id="btn-back-dashboard">&larr; Back to dashboard</button>
+    </div>
+  </section>
+
+  <!-- CLUBS -->
+  <section class="view" id="view-clubs">
+    <div class="row between">
+      <div>
+        <span class="eyebrow">Shot dispersion</span>
+        <h1 style="font-size:2rem;">Your clubs</h1>
+      </div>
+      <button class="btn solid" id="btn-add-club">+ Add club</button>
+    </div>
+    <p style="color:#55554a; max-width:52ch; margin-top:0.75rem;">Log carry distance and how far left/right of your target line each shot finished. A club needs at least 5 logged shots before it shows up in the Tee Planner.</p>
+    <div id="club-list-wrap" style="margin-top:1.5rem;"></div>
+  </section>
+
+  <!-- CLUB DETAIL -->
+  <section class="view" id="view-club-detail">
+    <div class="row between">
+      <div>
+        <span class="eyebrow">Club</span>
+        <h1 style="font-size:1.8rem;" id="club-detail-name">Club</h1>
+      </div>
+      <button class="btn danger small" id="btn-delete-club">Delete club</button>
+    </div>
+
+    <div class="detail-summary" id="club-detail-stats"></div>
+
+    <div class="row" style="align-items:flex-end; margin: 1.5rem 0; gap: 0.75rem;">
+      <div class="field" style="margin-bottom:0; flex:1; min-width:140px;">
+        <label for="shot-distance">Carry distance (yd)</label>
+        <input type="text" inputmode="numeric" id="shot-distance" placeholder="e.g. 232">
+      </div>
+      <div class="field" style="margin-bottom:0; flex:1; min-width:160px;">
+        <label for="shot-offline">Offline, yd (− left / + right)</label>
+        <input type="text" inputmode="numeric" id="shot-offline" placeholder="e.g. -12 or 8">
+      </div>
+      <button class="btn solid" id="btn-add-shot">Log shot</button>
+    </div>
+
+    <div class="chart-wrap">
+      <svg id="club-scatter" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <h2 style="font-size:1rem; margin: 2rem 0 1rem;">Shot log</h2>
+    <div id="shot-list-wrap"></div>
+
+    <div class="row" style="margin-top:1.5rem;">
+      <button class="btn ghost" id="btn-back-clubs">&larr; Back to clubs</button>
+    </div>
+  </section>
+
+  <!-- TEE PLANNER -->
+  <section class="view" id="view-planner">
+    <span class="eyebrow">Strategy</span>
+    <h1 style="font-size:1.8rem; margin-bottom:0.25rem;">Tee shot planner</h1>
+    <p style="color:#55554a; max-width:56ch; margin-top:0.5rem;">Pick a club, describe the hole, then drag the aim slider to see how your real dispersion pattern lands relative to the fairway and any hazards.</p>
+
+    <div class="planner-grid">
+      <div class="planner-controls">
+        <div class="field">
+          <label for="planner-club">Club</label>
+          <select id="planner-club"></select>
+        </div>
+        <div class="field">
+          <label for="planner-fairway">Fairway width (yd)</label>
+          <input type="text" inputmode="numeric" id="planner-fairway" value="32">
+        </div>
+
+        <div class="field">
+          <label>Hazards (optional)</label>
+          <div id="hazard-list"></div>
+          <div class="hazard-form">
+            <input type="text" id="hz-label" placeholder="Label (e.g. Fairway bunker)">
+            <div class="hazard-form-row">
+              <input type="text" inputmode="numeric" id="hz-dist-start" placeholder="From, yd off tee">
+              <input type="text" inputmode="numeric" id="hz-dist-end" placeholder="To, yd off tee">
+              <input type="text" inputmode="numeric" id="hz-off-start" placeholder="Offline from">
+              <input type="text" inputmode="numeric" id="hz-off-end" placeholder="Offline to">
+            </div>
+            <button class="btn ghost small" id="btn-add-hazard" type="button">+ Add hazard</button>
+            <p class="hint">Offline is yards from the center line: negative = left, positive = right. Example: a right bunker 210&ndash;235y out, 15&ndash;35y right &rarr; From 210, To 235, Offline from 15, Offline to 35.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="planner-aim">Aim offset: <span id="aim-value">0</span> yd <span id="aim-side"></span></label>
+          <input type="range" id="planner-aim" min="-50" max="50" step="1" value="0" style="width:100%;">
+        </div>
+
+        <button class="btn solid" id="btn-suggest-aim" type="button">Suggest best aim</button>
+      </div>
+
+      <div class="planner-visual">
+        <div class="chart-wrap">
+          <svg id="planner-svg" viewBox="0 0 300 410" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="planner-stats" id="planner-stats"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = 'gimmieRight.golfRounds.v1';
+
+  var els = {};
+  ['view-dashboard','view-setup','view-scorecard','view-detail','view-clubs','view-club-detail','view-planner',
+   'stat-grid','round-list-wrap',
+   'setup-course','par-grid','btn-start-round','btn-cancel-setup','btn-new-round',
+   'sc-course-label','scorecard-body','sc-total-par','sc-total-score','sc-total-putts','sc-total-topar',
+   'btn-save-round','btn-cancel-round',
+   'detail-date','detail-course','detail-summary','detail-body','btn-delete-round','btn-back-dashboard',
+   'btn-add-club','club-list-wrap','club-detail-name','club-detail-stats',
+   'shot-distance','shot-offline','btn-add-shot','shot-list-wrap','btn-delete-club','btn-back-clubs',
+   'planner-club','planner-fairway','hazard-list','hz-label','hz-dist-start','hz-dist-end','hz-off-start','hz-off-end','btn-add-hazard',
+   'planner-aim','aim-value','aim-side','btn-suggest-aim','planner-stats'
+  ].forEach(function(id){ els[id] = document.getElementById(id); });
+
+  var CLUBS_KEY = 'gimmieRight.golfClubs.v1';
+
+  var state = {
+    holesCount: 18,
+    pendingPars: [],
+    activeRound: null, // round being scored
+    viewingRoundId: null,
+    viewingClubId: null,
+    hazards: []
+  };
+
+  function loadRounds(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function saveRounds(rounds){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rounds));
+  }
+
+  function showView(id){
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function defaultPars(count){
+    // standard-ish distribution: mostly par 4, a handful of 3s and 5s
+    var pars = [];
+    for(var i=0;i<count;i++){
+      var m = i % 9;
+      if(m === 2 || m === 6) pars.push(3);
+      else if(m === 4 || m === 8) pars.push(5);
+      else pars.push(4);
+    }
+    return pars;
+  }
+
+  function renderParGrid(){
+    state.pendingPars = defaultPars(state.holesCount);
+    var html = '';
+    state.pendingPars.forEach(function(par, i){
+      html += '<div class="par-cell"><div class="h">Hole ' + (i+1) + '</div>' +
+        '<select data-idx="' + i + '">' +
+          [3,4,5].map(function(p){ return '<option value="'+p+'"' + (p===par?' selected':'') + '>' + p + '</option>'; }).join('') +
+        '</select></div>';
+    });
+    els['par-grid'].innerHTML = html;
+    els['par-grid'].querySelectorAll('select').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        state.pendingPars[parseInt(sel.getAttribute('data-idx'),10)] = parseInt(sel.value,10);
+      });
+    });
+  }
+
+  document.querySelectorAll('.seg button[data-holes]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.seg button[data-holes]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.holesCount = parseInt(btn.getAttribute('data-holes'),10);
+      renderParGrid();
+    });
+  });
+
+  els['btn-new-round'].addEventListener('click', function(){
+    els['setup-course'].value = '';
+    state.holesCount = 18;
+    document.querySelectorAll('.seg button[data-holes]').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-holes') === '18');
+    });
+    renderParGrid();
+    showView('view-setup');
+  });
+  els['btn-cancel-setup'].addEventListener('click', function(){ showView('view-dashboard'); });
+
+  els['btn-start-round'].addEventListener('click', function(){
+    var holes = state.pendingPars.map(function(par, i){
+      return { number: i+1, par: par, score: null, putts: null, fairway: null };
+    });
+    state.activeRound = {
+      id: 'r_' + Date.now(),
+      date: new Date().toISOString(),
+      course: els['setup-course'].value.trim() || 'Unnamed round',
+      holes: holes
+    };
+    renderScorecard();
+    showView('view-scorecard');
+  });
+
+  function girForHole(hole){
+    if(hole.score == null || hole.putts == null) return null;
+    var strokesToGreen = hole.score - hole.putts;
+    return strokesToGreen <= (hole.par - 2);
+  }
+
+  function renderScorecard(){
+    var round = state.activeRound;
+    els['sc-course-label'].textContent = round.course + ' · ' + round.holes.length + ' holes';
+    var html = '';
+    round.holes.forEach(function(hole, i){
+      var isPar3 = hole.par === 3;
+      html += '<tr data-idx="' + i + '">' +
+        '<td class="hole">' + hole.number + '</td>' +
+        '<td>' + hole.par + '</td>' +
+        '<td><input type="number" min="1" max="15" class="in-score" data-idx="' + i + '"></td>' +
+        '<td><input type="number" min="0" max="10" class="in-putts" data-idx="' + i + '"></td>' +
+        '<td>' + (isPar3 ? '<span class="na">N/A</span>' : '<input type="checkbox" class="in-fairway" data-idx="' + i + '">') + '</td>' +
+        '<td class="gir-cell" data-idx="' + i + '">—</td>' +
+        '</tr>';
+    });
+    els['scorecard-body'].innerHTML = html;
+
+    els['scorecard-body'].querySelectorAll('.in-score, .in-putts').forEach(function(inp){
+      inp.addEventListener('input', onScoreInput);
+    });
+    els['scorecard-body'].querySelectorAll('.in-fairway').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var idx = parseInt(inp.getAttribute('data-idx'),10);
+        round.holes[idx].fairway = inp.checked;
+      });
+    });
+    updateScorecardTotals();
+  }
+
+  function onScoreInput(e){
+    var idx = parseInt(e.target.getAttribute('data-idx'),10);
+    var round = state.activeRound;
+    var hole = round.holes[idx];
+    var scoreEl = els['scorecard-body'].querySelector('.in-score[data-idx="'+idx+'"]');
+    var puttsEl = els['scorecard-body'].querySelector('.in-putts[data-idx="'+idx+'"]');
+    hole.score = scoreEl.value === '' ? null : parseInt(scoreEl.value,10);
+    hole.putts = puttsEl.value === '' ? null : parseInt(puttsEl.value,10);
+    var girCell = els['scorecard-body'].querySelector('.gir-cell[data-idx="'+idx+'"]');
+    var gir = girForHole(hole);
+    girCell.textContent = gir === null ? '—' : (gir ? 'Yes' : 'No');
+    girCell.className = 'gir-cell ' + (gir === null ? '' : (gir ? 'gir-yes' : 'gir-no'));
+    updateScorecardTotals();
+  }
+
+  function updateScorecardTotals(){
+    var round = state.activeRound;
+    var totalPar = 0, totalScore = 0, totalPutts = 0, anyScore = false, allScored = true;
+    round.holes.forEach(function(h){
+      totalPar += h.par;
+      if(h.score != null){ totalScore += h.score; anyScore = true; } else { allScored = false; }
+      if(h.putts != null){ totalPutts += h.putts; }
+    });
+    els['sc-total-par'].textContent = totalPar;
+    els['sc-total-score'].textContent = anyScore ? totalScore : '—';
+    els['sc-total-putts'].textContent = totalPutts || '—';
+    if(anyScore){
+      var diff = totalScore - totalPar;
+      els['sc-total-topar'].textContent = diff === 0 ? 'E' : (diff > 0 ? '+' + diff : diff);
+    } else {
+      els['sc-total-topar'].textContent = '—';
+    }
+    els['btn-save-round'].disabled = !allScored;
+  }
+
+  els['btn-cancel-round'].addEventListener('click', function(){
+    state.activeRound = null;
+    showView('view-dashboard');
+  });
+
+  els['btn-save-round'].addEventListener('click', function(){
+    var round = state.activeRound;
+    var incomplete = round.holes.some(function(h){ return h.score == null; });
+    if(incomplete){ return; }
+    var rounds = loadRounds();
+    rounds.unshift(round);
+    saveRounds(rounds);
+    state.activeRound = null;
+    renderDashboard();
+    showView('view-dashboard');
+  });
+
+  function computeRoundTotals(round){
+    var totalPar = 0, totalScore = 0, totalPutts = 0;
+    var fairwaysPossible = 0, fairwaysHit = 0;
+    var girCount = 0;
+    round.holes.forEach(function(h){
+      totalPar += h.par;
+      totalScore += (h.score || 0);
+      totalPutts += (h.putts || 0);
+      if(h.par !== 3){
+        fairwaysPossible++;
+        if(h.fairway) fairwaysHit++;
+      }
+      if(girForHole(h)) girCount++;
+    });
+    return {
+      totalPar: totalPar, totalScore: totalScore, totalPutts: totalPutts,
+      toPar: totalScore - totalPar,
+      fairwaysPossible: fairwaysPossible, fairwaysHit: fairwaysHit,
+      girCount: girCount, holeCount: round.holes.length
+    };
+  }
+
+  function formatToPar(diff){
+    return diff === 0 ? 'E' : (diff > 0 ? '+' + diff : String(diff));
+  }
+  function toParClass(diff){
+    return diff === 0 ? 'even' : (diff > 0 ? 'over' : 'under');
+  }
+
+  function renderDashboard(){
+    var rounds = loadRounds();
+
+    if(rounds.length === 0){
+      els['stat-grid'].innerHTML = '';
+      els['round-list-wrap'].innerHTML = '<div class="empty">No rounds logged yet. Play one and log your scorecard to start seeing stats.</div>';
+      return;
+    }
+
+    var sums = { rounds: rounds.length, toPar: 0, putts: 0, fairwaysHit: 0, fairwaysPossible: 0, girCount: 0, holes: 0 };
+    var best = null;
+    rounds.forEach(function(r){
+      var t = computeRoundTotals(r);
+      sums.toPar += t.toPar;
+      sums.putts += t.totalPutts;
+      sums.fairwaysHit += t.fairwaysHit;
+      sums.fairwaysPossible += t.fairwaysPossible;
+      sums.girCount += t.girCount;
+      sums.holes += t.holeCount;
+      if(best === null || t.toPar < best) best = t.toPar;
+    });
+
+    var avgToPar = sums.toPar / sums.rounds;
+    var avgPutts = sums.putts / sums.rounds;
+    var fairwayPct = sums.fairwaysPossible ? Math.round(100 * sums.fairwaysHit / sums.fairwaysPossible) : 0;
+    var girPct = sums.holes ? Math.round(100 * sums.girCount / sums.holes) : 0;
+
+    els['stat-grid'].innerHTML =
+      statCard(sums.rounds, 'Rounds logged') +
+      statCard((avgToPar > 0 ? '+' : '') + avgToPar.toFixed(1), 'Avg score to par') +
+      statCard(avgPutts.toFixed(1), 'Avg putts / round') +
+      statCard(fairwayPct + '%', 'Fairways hit') +
+      statCard(girPct + '%', 'Greens in reg.') +
+      statCard(formatToPar(best), 'Best round');
+
+    var html = '<div class="round-list">';
+    rounds.forEach(function(r){
+      var t = computeRoundTotals(r);
+      var d = new Date(r.date);
+      html += '<div class="round-item" data-id="' + r.id + '">' +
+        '<div><div class="course">' + escapeHtml(r.course) + '</div>' +
+        '<div class="date">' + d.toLocaleDateString() + ' · ' + r.holes.length + ' holes</div></div>' +
+        '<div class="score"><div class="total">' + t.totalScore + '</div>' +
+        '<div class="topar ' + toParClass(t.toPar) + '">' + formatToPar(t.toPar) + '</div></div>' +
+        '</div>';
+    });
+    html += '</div>';
+    els['round-list-wrap'].innerHTML = html;
+
+    els['round-list-wrap'].querySelectorAll('.round-item').forEach(function(item){
+      item.addEventListener('click', function(){
+        openDetail(item.getAttribute('data-id'));
+      });
+    });
+  }
+
+  function statCard(num, lbl){
+    return '<div class="stat-card"><div class="num">' + num + '</div><div class="lbl">' + lbl + '</div></div>';
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function openDetail(id){
+    var rounds = loadRounds();
+    var round = rounds.find(function(r){ return r.id === id; });
+    if(!round) return;
+    state.viewingRoundId = id;
+    var t = computeRoundTotals(round);
+    var d = new Date(round.date);
+
+    els['detail-date'].textContent = d.toLocaleDateString();
+    els['detail-course'].textContent = round.course;
+
+    els['detail-summary'].innerHTML =
+      statCard(t.totalScore, 'Total score') +
+      statCard(formatToPar(t.toPar), 'To par') +
+      statCard(t.totalPutts, 'Putts') +
+      statCard((t.fairwaysPossible ? Math.round(100*t.fairwaysHit/t.fairwaysPossible) : 0) + '%', 'Fairways') +
+      statCard((t.holeCount ? Math.round(100*t.girCount/t.holeCount) : 0) + '%', 'GIR');
+
+    var html = '';
+    round.holes.forEach(function(h){
+      var gir = girForHole(h);
+      html += '<tr><td class="hole">' + h.number + '</td><td>' + h.par + '</td><td>' + h.score + '</td><td>' + h.putts + '</td>' +
+        '<td>' + (h.par === 3 ? '<span class="na">N/A</span>' : (h.fairway ? 'Hit' : 'Miss')) + '</td>' +
+        '<td class="' + (gir ? 'gir-yes' : 'gir-no') + '">' + (gir ? 'Yes' : 'No') + '</td></tr>';
+    });
+    els['detail-body'].innerHTML = html;
+
+    showView('view-detail');
+  }
+
+  els['btn-delete-round'].addEventListener('click', function(){
+    if(!state.viewingRoundId) return;
+    if(!confirm('Delete this round? This cannot be undone.')) return;
+    var rounds = loadRounds().filter(function(r){ return r.id !== state.viewingRoundId; });
+    saveRounds(rounds);
+    state.viewingRoundId = null;
+    renderDashboard();
+    showView('view-dashboard');
+  });
+
+  els['btn-back-dashboard'].addEventListener('click', function(){
+    renderDashboard();
+    showView('view-dashboard');
+  });
+
+  /* ---------------- tabs ---------------- */
+  document.querySelectorAll('.tabs button[data-tab]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tabs button[data-tab]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = btn.getAttribute('data-tab');
+      if(target === 'view-dashboard') renderDashboard();
+      if(target === 'view-clubs') renderClubList();
+      if(target === 'view-planner') renderPlanner();
+      showView(target);
+    });
+  });
+
+  /* ---------------- stats helpers ---------------- */
+  function mean(arr){ return arr.reduce(function(a,b){ return a+b; },0) / arr.length; }
+  function stddev(arr){
+    if(arr.length < 2) return 0;
+    var m = mean(arr);
+    var v = arr.reduce(function(a,b){ return a + (b-m)*(b-m); }, 0) / (arr.length - 1);
+    return Math.sqrt(v);
+  }
+  function gaussianRandom(){
+    var u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  /* ---------------- clubs / dispersion ---------------- */
+  function loadClubs(){
+    try{
+      var raw = localStorage.getItem(CLUBS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function saveClubs(clubs){ localStorage.setItem(CLUBS_KEY, JSON.stringify(clubs)); }
+
+  function clubStats(club){
+    var distances = club.shots.map(function(s){ return s.distance; });
+    var offlines = club.shots.map(function(s){ return s.offline; });
+    return {
+      count: club.shots.length,
+      meanDist: distances.length ? mean(distances) : 0,
+      sdDist: stddev(distances),
+      meanOffline: offlines.length ? mean(offlines) : 0,
+      sdOffline: stddev(offlines)
+    };
+  }
+
+  function renderClubList(){
+    var clubs = loadClubs();
+    if(clubs.length === 0){
+      els['club-list-wrap'].innerHTML = '<div class="empty">No clubs yet. Add a club (Driver, 7 Iron, etc.) and start logging shots to see your dispersion.</div>';
+      return;
+    }
+    var html = '<div class="round-list">';
+    clubs.forEach(function(c){
+      var st = clubStats(c);
+      html += '<div class="round-item" data-id="' + c.id + '">' +
+        '<div><div class="course">' + escapeHtml(c.name) + '</div>' +
+        '<div class="date">' + st.count + ' shot' + (st.count === 1 ? '' : 's') + ' logged' + (st.count < 5 ? ' &middot; need ' + (5 - st.count) + ' more for planner' : '') + '</div></div>' +
+        '<div class="score"><div class="total">' + (st.count ? Math.round(st.meanDist) + 'y' : '—') + '</div>' +
+        '<div class="topar even">' + (st.count ? (st.meanOffline >= 0 ? '+' : '') + Math.round(st.meanOffline) + 'y bias' : '') + '</div></div>' +
+        '</div>';
+    });
+    html += '</div>';
+    els['club-list-wrap'].innerHTML = html;
+    els['club-list-wrap'].querySelectorAll('.round-item').forEach(function(item){
+      item.addEventListener('click', function(){ openClubDetail(item.getAttribute('data-id')); });
+    });
+  }
+
+  els['btn-add-club'].addEventListener('click', function(){
+    var name = prompt('Club name (e.g. Driver, 7 Iron):');
+    if(!name) return;
+    name = name.trim();
+    if(!name) return;
+    var clubs = loadClubs();
+    clubs.push({ id: 'c_' + Date.now(), name: name, shots: [] });
+    saveClubs(clubs);
+    renderClubList();
+  });
+
+  function openClubDetail(id){
+    var clubs = loadClubs();
+    var club = clubs.find(function(c){ return c.id === id; });
+    if(!club) return;
+    state.viewingClubId = id;
+    els['club-detail-name'].textContent = club.name;
+    var st = clubStats(club);
+    els['club-detail-stats'].innerHTML =
+      statCard(st.count, 'Shots logged') +
+      statCard(st.count ? Math.round(st.meanDist) + 'y' : '—', 'Avg carry') +
+      statCard(st.count > 1 ? '±' + Math.round(st.sdDist) + 'y' : '—', 'Carry spread (1 SD)') +
+      statCard(st.count ? (st.meanOffline >= 0 ? '+' : '') + Math.round(st.meanOffline) + 'y' : '—', 'Avg bias (− L / + R)') +
+      statCard(st.count > 1 ? '±' + Math.round(st.sdOffline) + 'y' : '—', 'Side spread (1 SD)');
+    renderClubScatter(club);
+    renderShotList(club);
+    showView('view-club-detail');
+  }
+
+  function renderClubScatter(club){
+    var svg = els['club-scatter'] || document.getElementById('club-scatter');
+    var shots = club.shots;
+    if(shots.length === 0){
+      svg.innerHTML = '<text x="160" y="160" text-anchor="middle" font-size="12" fill="#9a9a8c">No shots logged yet</text>';
+      return;
+    }
+    var offlines = shots.map(function(s){ return s.offline; });
+    var dists = shots.map(function(s){ return s.distance; });
+    var maxOffline = Math.max(30, Math.max.apply(null, offlines.map(Math.abs)) * 1.25);
+    var maxDist = Math.max.apply(null, dists) * 1.1;
+    var minDist = Math.min(0, Math.min.apply(null, dists) * 0.9);
+    function X(o){ return 160 + (o / maxOffline) * 140; }
+    function Y(d){ return 300 - ((d - minDist) / (maxDist - minDist || 1)) * 280; }
+    var s = '<line x1="' + X(0) + '" y1="20" x2="' + X(0) + '" y2="300" stroke="#c9c2ae" stroke-dasharray="4 4" stroke-width="1"/>';
+    shots.forEach(function(sh){
+      s += '<circle cx="' + X(sh.offline) + '" cy="' + Y(sh.distance) + '" r="4.5" fill="rgba(199,162,78,0.75)" stroke="#101C14" stroke-width="0.5"/>';
+    });
+    var st = clubStats(club);
+    s += '<circle cx="' + X(st.meanOffline) + '" cy="' + Y(st.meanDist) + '" r="7" fill="none" stroke="#101C14" stroke-width="2"/>';
+    svg.innerHTML = s;
+  }
+
+  function renderShotList(club){
+    if(club.shots.length === 0){ els['shot-list-wrap'].innerHTML = ''; return; }
+    var html = '';
+    for(var idx = club.shots.length - 1; idx >= 0; idx--){
+      var s = club.shots[idx];
+      html += '<div class="shot-item">' +
+        '<div>' + s.distance + 'y carry &middot; ' + (s.offline >= 0 ? '+' : '') + s.offline + 'y ' + (s.offline >= 0 ? 'right' : 'left') + '</div>' +
+        '<button class="btn ghost small" data-shot-idx="' + idx + '">Remove</button>' +
+        '</div>';
+    }
+    els['shot-list-wrap'].innerHTML = html;
+    els['shot-list-wrap'].querySelectorAll('button[data-shot-idx]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var i = parseInt(btn.getAttribute('data-shot-idx'), 10);
+        var clubs = loadClubs();
+        var club = clubs.find(function(c){ return c.id === state.viewingClubId; });
+        if(!club) return;
+        club.shots.splice(i, 1);
+        saveClubs(clubs);
+        openClubDetail(state.viewingClubId);
+      });
+    });
+  }
+
+  els['btn-add-shot'].addEventListener('click', function(){
+    var distance = parseFloat(els['shot-distance'].value);
+    var offline = parseFloat(els['shot-offline'].value);
+    if(!isFinite(distance) || distance <= 0 || !isFinite(offline)) return;
+    var clubs = loadClubs();
+    var club = clubs.find(function(c){ return c.id === state.viewingClubId; });
+    if(!club) return;
+    club.shots.push({ distance: distance, offline: offline });
+    saveClubs(clubs);
+    els['shot-distance'].value = '';
+    els['shot-offline'].value = '';
+    openClubDetail(state.viewingClubId);
+  });
+
+  els['btn-delete-club'].addEventListener('click', function(){
+    if(!state.viewingClubId) return;
+    if(!confirm('Delete this club and all its logged shots?')) return;
+    var clubs = loadClubs().filter(function(c){ return c.id !== state.viewingClubId; });
+    saveClubs(clubs);
+    state.viewingClubId = null;
+    renderClubList();
+    showView('view-clubs');
+  });
+
+  els['btn-back-clubs'].addEventListener('click', function(){
+    renderClubList();
+    showView('view-clubs');
+  });
+
+  /* ---------------- tee planner ---------------- */
+  function renderHazardList(){
+    if(state.hazards.length === 0){ els['hazard-list'].innerHTML = ''; return; }
+    els['hazard-list'].innerHTML = state.hazards.map(function(h, i){
+      return '<div class="hazard-chip"><span>' + escapeHtml(h.label || 'Hazard') + ' &middot; ' + h.distStart + '–' + h.distEnd + 'y &middot; ' + h.offStart + ' to ' + h.offEnd + 'y</span>' +
+        '<button data-hz-idx="' + i + '">Remove</button></div>';
+    }).join('');
+    els['hazard-list'].querySelectorAll('button[data-hz-idx]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.hazards.splice(parseInt(btn.getAttribute('data-hz-idx'), 10), 1);
+        renderHazardList();
+        recomputePlanner();
+      });
+    });
+  }
+
+  els['btn-add-hazard'].addEventListener('click', function(){
+    var label = els['hz-label'].value.trim();
+    var distStart = parseFloat(els['hz-dist-start'].value);
+    var distEnd = parseFloat(els['hz-dist-end'].value);
+    var offStart = parseFloat(els['hz-off-start'].value);
+    var offEnd = parseFloat(els['hz-off-end'].value);
+    if(!isFinite(distStart) || !isFinite(distEnd) || !isFinite(offStart) || !isFinite(offEnd)) return;
+    state.hazards.push({
+      label: label,
+      distStart: Math.min(distStart, distEnd),
+      distEnd: Math.max(distStart, distEnd),
+      offStart: Math.min(offStart, offEnd),
+      offEnd: Math.max(offStart, offEnd)
+    });
+    els['hz-label'].value = '';
+    els['hz-dist-start'].value = '';
+    els['hz-dist-end'].value = '';
+    els['hz-off-start'].value = '';
+    els['hz-off-end'].value = '';
+    renderHazardList();
+    recomputePlanner();
+  });
+
+  function simulateShots(st, aim, n){
+    var out = [];
+    for(var i = 0; i < n; i++){
+      out.push({
+        distance: st.meanDist + st.sdDist * gaussianRandom(),
+        offline: aim + st.meanOffline + st.sdOffline * gaussianRandom()
+      });
+    }
+    return out;
+  }
+
+  function classifySamples(samples, fairwayWidth, hazards){
+    return samples.map(function(s){
+      var inHazard = hazards.some(function(h){
+        return s.distance >= h.distStart && s.distance <= h.distEnd && s.offline >= h.offStart && s.offline <= h.offEnd;
+      });
+      if(inHazard) return 'hazard';
+      if(Math.abs(s.offline) <= fairwayWidth / 2) return 'fairway';
+      return 'rough';
+    });
+  }
+
+  function currentPlannerClub(){
+    var clubs = loadClubs();
+    return clubs.find(function(c){ return c.id === els['planner-club'].value; });
+  }
+
+  function renderPlanner(){
+    var clubs = loadClubs().filter(function(c){ return c.shots.length >= 5; });
+    var sel = els['planner-club'];
+    if(clubs.length === 0){
+      sel.innerHTML = '<option value="">No club has 5+ shots yet</option>';
+      sel.disabled = true;
+      els['btn-suggest-aim'].disabled = true;
+      els['planner-aim'].disabled = true;
+      els['planner-stats'].innerHTML = '<div class="empty" style="grid-column: 1 / -1;">Log at least 5 shots for a club in the Clubs tab to unlock the tee planner.</div>';
+      document.getElementById('planner-svg').innerHTML = '';
+      return;
+    }
+    sel.disabled = false;
+    els['btn-suggest-aim'].disabled = false;
+    els['planner-aim'].disabled = false;
+    var prevVal = sel.value;
+    sel.innerHTML = clubs.map(function(c){
+      return '<option value="' + c.id + '">' + escapeHtml(c.name) + ' (' + c.shots.length + ' shots)</option>';
+    }).join('');
+    if(prevVal && clubs.some(function(c){ return c.id === prevVal; })) sel.value = prevVal;
+    renderHazardList();
+    recomputePlanner();
+  }
+
+  function recomputePlanner(){
+    var club = currentPlannerClub();
+    if(!club) return;
+    var st = clubStats(club);
+    var fairwayWidth = parseFloat(els['planner-fairway'].value) || 30;
+    var aim = parseFloat(els['planner-aim'].value) || 0;
+    els['aim-value'].textContent = (aim >= 0 ? '+' : '') + aim;
+    els['aim-side'].textContent = aim === 0 ? '(center)' : (aim > 0 ? '(right)' : '(left)');
+
+    var samples = simulateShots(st, aim, 1500);
+    var classified = classifySamples(samples, fairwayWidth, state.hazards);
+    renderPlannerChart(samples.slice(0, 260), classified.slice(0, 260), fairwayWidth, aim, st);
+    renderPlannerStats(classified, st);
+  }
+
+  function renderPlannerStats(classified, st){
+    var total = classified.length;
+    var fairway = classified.filter(function(c){ return c === 'fairway'; }).length;
+    var hazard = classified.filter(function(c){ return c === 'hazard'; }).length;
+    var rough = total - fairway - hazard;
+    function pct(n){ return Math.round(100 * n / total); }
+    els['planner-stats'].innerHTML =
+      statCard(pct(fairway) + '%', 'Fairway') +
+      statCard(pct(hazard) + '%', 'Hazard') +
+      statCard(pct(rough) + '%', 'Rough') +
+      statCard(Math.round(st.meanDist) + 'y', 'Avg carry');
+  }
+
+  function renderPlannerChart(samples, classified, fairwayWidth, aim, st){
+    var svg = document.getElementById('planner-svg');
+    var hazardOffs = [];
+    state.hazards.forEach(function(h){ hazardOffs.push(Math.abs(h.offStart), Math.abs(h.offEnd)); });
+    var hazardDists = state.hazards.map(function(h){ return h.distEnd; });
+    var maxOffline = Math.max(50, fairwayWidth / 2 + 25, Math.abs(aim) + st.sdOffline * 3 + 15, hazardOffs.length ? Math.max.apply(null, hazardOffs) + 15 : 0);
+    var maxDist = Math.max(60, st.meanDist + st.sdDist * 3, hazardDists.length ? Math.max.apply(null, hazardDists) : 0) * 1.05;
+
+    function X(o){ return 150 + (o / maxOffline) * 130; }
+    function Y(d){ return 400 - (Math.max(0, d) / maxDist) * 370; }
+
+    var s = '';
+    var fx1 = X(-fairwayWidth / 2), fx2 = X(fairwayWidth / 2);
+    s += '<rect x="' + fx1 + '" y="10" width="' + (fx2 - fx1) + '" height="390" fill="rgba(46,107,62,0.13)"/>';
+    s += '<line x1="' + X(0) + '" y1="10" x2="' + X(0) + '" y2="400" stroke="#c9c2ae" stroke-dasharray="3 5" stroke-width="1"/>';
+    state.hazards.forEach(function(h){
+      var hx1 = X(h.offStart), hx2 = X(h.offEnd), hy1 = Y(h.distEnd), hy2 = Y(h.distStart);
+      s += '<rect x="' + Math.min(hx1, hx2) + '" y="' + hy1 + '" width="' + Math.abs(hx2 - hx1) + '" height="' + Math.max(0, hy2 - hy1) + '" fill="rgba(164,69,58,0.28)" stroke="rgba(164,69,58,0.6)" stroke-width="1"/>';
+      s += '<text x="' + ((hx1 + hx2) / 2) + '" y="' + ((hy1 + hy2) / 2) + '" font-size="8" text-anchor="middle" fill="#7a2e26">' + escapeHtml(h.label || 'Hazard') + '</text>';
+    });
+    samples.forEach(function(pt, i){
+      var color = classified[i] === 'fairway' ? 'rgba(46,107,62,0.7)' : (classified[i] === 'hazard' ? 'rgba(164,69,58,0.85)' : 'rgba(120,113,96,0.55)');
+      s += '<circle cx="' + X(pt.offline) + '" cy="' + Y(pt.distance) + '" r="2.6" fill="' + color + '"/>';
+    });
+    s += '<circle cx="' + X(aim) + '" cy="' + Y(0) + '" r="6" fill="#C7A24E" stroke="#101C14" stroke-width="1.5"/>';
+    s += '<text x="' + X(aim) + '" y="' + (Y(0) + 16) + '" font-size="9" text-anchor="middle" fill="#101C14">Aim</text>';
+    svg.innerHTML = s;
+  }
+
+  els['planner-club'].addEventListener('change', recomputePlanner);
+  els['planner-fairway'].addEventListener('input', recomputePlanner);
+  els['planner-aim'].addEventListener('input', recomputePlanner);
+
+  els['btn-suggest-aim'].addEventListener('click', function(){
+    var club = currentPlannerClub();
+    if(!club) return;
+    var st = clubStats(club);
+    var fairwayWidth = parseFloat(els['planner-fairway'].value) || 30;
+    var best = null;
+    for(var a = -50; a <= 50; a += 2){
+      var samples = simulateShots(st, a, 400);
+      var classified = classifySamples(samples, fairwayWidth, state.hazards);
+      var total = classified.length;
+      var fairwayPct = classified.filter(function(c){ return c === 'fairway'; }).length / total;
+      var hazardPct = classified.filter(function(c){ return c === 'hazard'; }).length / total;
+      var score = fairwayPct - hazardPct * 2;
+      if(best === null || score > best.score){ best = { aim: a, score: score }; }
+    }
+    els['planner-aim'].value = best.aim;
+    recomputePlanner();
+  });
+
+  renderParGrid();
+  renderDashboard();
+})();
+</script>
+
+</body>
+</html>
