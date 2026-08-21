@@ -179,6 +179,8 @@
   table.card td.gir-yes{ color:#2e6b3e; font-weight:600; }
   table.card td.gir-no{ color:#b7b0a0; }
   table.card input[type=checkbox]{ width: 1.1rem; height:1.1rem; }
+  table.card select.in-tee-club{ width: 7rem; padding: 0.35rem; border-radius: 6px; border: 1px solid rgba(16,28,20,0.15); font-family: var(--body); font-size: 0.8rem; }
+  table.card input.in-tee-dist, table.card input.in-tee-off{ width: 3.4rem; }
   table.card td.na{ color:#cfc9ba; font-family: var(--mono); font-size:0.75rem; }
   tfoot td{ font-family: var(--mono); font-weight:600; background:#f7f2e7; }
 
@@ -311,6 +313,9 @@
             <th>Putts</th>
             <th>Fairway</th>
             <th>GIR</th>
+            <th>Tee club</th>
+            <th>Carry (yd)</th>
+            <th>Offline (yd)</th>
           </tr>
         </thead>
         <tbody id="scorecard-body"></tbody>
@@ -320,13 +325,13 @@
             <td id="sc-total-par">—</td>
             <td id="sc-total-score">—</td>
             <td id="sc-total-putts">—</td>
-            <td colspan="2" id="sc-total-topar">—</td>
+            <td colspan="5" id="sc-total-topar">—</td>
           </tr>
         </tfoot>
       </table>
     </div>
 
-    <p style="font-size:0.8rem; color:#7a7a6d; margin-top:0.75rem;">Fairway hit only applies to par 4s and 5s. GIR is calculated automatically from score and putts (on the green in par minus 2 strokes or better).</p>
+    <p style="font-size:0.8rem; color:#7a7a6d; margin-top:0.75rem;">Fairway hit only applies to par 4s and 5s. GIR is calculated automatically from score and putts (on the green in par minus 2 strokes or better). Tee club, carry, and offline are optional — fill them in and they're added straight to that club's dispersion log when you save the round.</p>
 
     <div class="row" style="margin-top:1.5rem;">
       <button class="btn solid" id="btn-save-round">Save round</button>
@@ -349,7 +354,7 @@
     <div class="scroll-x">
       <table class="card" id="detail-table">
         <thead>
-          <tr><th>Hole</th><th>Par</th><th>Score</th><th>Putts</th><th>Fairway</th><th>GIR</th></tr>
+          <tr><th>Hole</th><th>Par</th><th>Score</th><th>Putts</th><th>Fairway</th><th>GIR</th><th>Tee club</th><th>Carry</th><th>Offline</th></tr>
         </thead>
         <tbody id="detail-body"></tbody>
       </table>
@@ -556,7 +561,7 @@
 
   els['btn-start-round'].addEventListener('click', function(){
     var holes = state.pendingPars.map(function(par, i){
-      return { number: i+1, par: par, score: null, putts: null, fairway: null };
+      return { number: i+1, par: par, score: null, putts: null, fairway: null, teeClub: null, teeDistance: null, teeOffline: null };
     });
     state.activeRound = {
       id: 'r_' + Date.now(),
@@ -574,6 +579,16 @@
     return strokesToGreen <= (hole.par - 2);
   }
 
+  function teeClubOptionsHtml(selectedId){
+    var clubs = loadClubs();
+    var html = '<option value=""' + (!selectedId ? ' selected' : '') + '>—</option>';
+    clubs.forEach(function(c){
+      html += '<option value="' + c.id + '"' + (c.id === selectedId ? ' selected' : '') + '>' + escapeHtml(c.name) + '</option>';
+    });
+    html += '<option value="__new__">+ New club…</option>';
+    return html;
+  }
+
   function renderScorecard(){
     var round = state.activeRound;
     els['sc-course-label'].textContent = round.course + ' · ' + round.holes.length + ' holes';
@@ -587,6 +602,9 @@
         '<td><input type="number" min="0" max="10" class="in-putts" data-idx="' + i + '"></td>' +
         '<td>' + (isPar3 ? '<span class="na">N/A</span>' : '<input type="checkbox" class="in-fairway" data-idx="' + i + '">') + '</td>' +
         '<td class="gir-cell" data-idx="' + i + '">—</td>' +
+        '<td><select class="in-tee-club" data-idx="' + i + '">' + teeClubOptionsHtml(hole.teeClub) + '</select></td>' +
+        '<td><input type="number" min="0" max="400" class="in-tee-dist" data-idx="' + i + '"></td>' +
+        '<td><input type="number" min="-100" max="100" class="in-tee-off" data-idx="' + i + '"></td>' +
         '</tr>';
     });
     els['scorecard-body'].innerHTML = html;
@@ -600,7 +618,47 @@
         round.holes[idx].fairway = inp.checked;
       });
     });
+    els['scorecard-body'].querySelectorAll('.in-tee-dist, .in-tee-off').forEach(function(inp){
+      inp.addEventListener('input', onTeeShotInput);
+    });
+    els['scorecard-body'].querySelectorAll('.in-tee-club').forEach(function(sel){
+      sel.addEventListener('change', function(){ onTeeClubChange(sel); });
+    });
     updateScorecardTotals();
+  }
+
+  function onTeeShotInput(e){
+    var idx = parseInt(e.target.getAttribute('data-idx'),10);
+    var hole = state.activeRound.holes[idx];
+    var distEl = els['scorecard-body'].querySelector('.in-tee-dist[data-idx="'+idx+'"]');
+    var offEl = els['scorecard-body'].querySelector('.in-tee-off[data-idx="'+idx+'"]');
+    hole.teeDistance = distEl.value === '' ? null : parseFloat(distEl.value);
+    hole.teeOffline = offEl.value === '' ? null : parseFloat(offEl.value);
+  }
+
+  function onTeeClubChange(sel){
+    var idx = parseInt(sel.getAttribute('data-idx'),10);
+    var round = state.activeRound;
+    if(sel.value === '__new__'){
+      var name = prompt('Club name (e.g. Driver, 3 Wood):');
+      name = name && name.trim();
+      if(name){
+        var clubs = loadClubs();
+        var club = { id: 'c_' + Date.now(), name: name, shots: [] };
+        clubs.push(club);
+        saveClubs(clubs);
+        round.holes[idx].teeClub = club.id;
+        els['scorecard-body'].querySelectorAll('.in-tee-club').forEach(function(otherSel){
+          var otherIdx = parseInt(otherSel.getAttribute('data-idx'),10);
+          var keepVal = round.holes[otherIdx].teeClub;
+          otherSel.innerHTML = teeClubOptionsHtml(keepVal);
+        });
+      } else {
+        sel.value = round.holes[idx].teeClub || '';
+      }
+    } else {
+      round.holes[idx].teeClub = sel.value || null;
+    }
   }
 
   function onScoreInput(e){
@@ -650,6 +708,17 @@
     var rounds = loadRounds();
     rounds.unshift(round);
     saveRounds(rounds);
+
+    var clubs = loadClubs();
+    var loggedShots = false;
+    round.holes.forEach(function(h){
+      if(h.teeClub && h.teeDistance != null && h.teeOffline != null){
+        var club = clubs.find(function(c){ return c.id === h.teeClub; });
+        if(club){ club.shots.push({ distance: h.teeDistance, offline: h.teeOffline }); loggedShots = true; }
+      }
+    });
+    if(loggedShots) saveClubs(clubs);
+
     state.activeRound = null;
     renderDashboard();
     showView('view-dashboard');
@@ -768,12 +837,18 @@
       statCard((t.fairwaysPossible ? Math.round(100*t.fairwaysHit/t.fairwaysPossible) : 0) + '%', 'Fairways') +
       statCard((t.holeCount ? Math.round(100*t.girCount/t.holeCount) : 0) + '%', 'GIR');
 
+    var clubs = loadClubs();
     var html = '';
     round.holes.forEach(function(h){
       var gir = girForHole(h);
+      var clubName = h.teeClub ? (function(){ var c = clubs.find(function(x){ return x.id === h.teeClub; }); return c ? c.name : '—'; })() : '—';
       html += '<tr><td class="hole">' + h.number + '</td><td>' + h.par + '</td><td>' + h.score + '</td><td>' + h.putts + '</td>' +
         '<td>' + (h.par === 3 ? '<span class="na">N/A</span>' : (h.fairway ? 'Hit' : 'Miss')) + '</td>' +
-        '<td class="' + (gir ? 'gir-yes' : 'gir-no') + '">' + (gir ? 'Yes' : 'No') + '</td></tr>';
+        '<td class="' + (gir ? 'gir-yes' : 'gir-no') + '">' + (gir ? 'Yes' : 'No') + '</td>' +
+        '<td>' + escapeHtml(clubName) + '</td>' +
+        '<td>' + (h.teeDistance != null ? h.teeDistance + 'y' : '—') + '</td>' +
+        '<td>' + (h.teeOffline != null ? (h.teeOffline >= 0 ? '+' : '') + h.teeOffline + 'y' : '—') + '</td>' +
+        '</tr>';
     });
     els['detail-body'].innerHTML = html;
 
